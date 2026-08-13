@@ -6,7 +6,7 @@ db = SQLAlchemy()
 
 class User(db.Model):
     user_id: Mapped[int] = mapped_column(primary_key=True)
-    name: Mapped[str] = mapped_column(nullable=False)
+    name: Mapped[str] = mapped_column(nullable=True)
     email: Mapped[str] = mapped_column(String(120), unique=True, nullable=False)
     password: Mapped[str] = mapped_column(nullable=False)
     favorite_characters: Mapped[list["Character"]] = relationship("Character", secondary="favorite_characters", back_populates="favorited_by")
@@ -31,7 +31,7 @@ class Character(db.Model):
     max_ki: Mapped[int] = mapped_column(nullable=True)
     description: Mapped[str] = mapped_column(nullable=True)
     affiliation: Mapped[str] = mapped_column(nullable=True)
-    origin_planet_id: Mapped[int] = mapped_column(ForeignKey('planet.planet_id'), nullable=True)
+    origin_planet_id: Mapped[int] = mapped_column(ForeignKey('planet.planet_id'), nullable=False)
     favorited_by: Mapped[list["User"]] = relationship("User", secondary="favorite_characters", back_populates="favorite_characters")
     planet: Mapped["Planet"] = relationship("Planet", back_populates="characters")
 
@@ -88,4 +88,4 @@ favorite_planets = Table(
     db.metadata,
     Column('user_id', ForeignKey('user.user_id'), primary_key=True),
     Column('planet_id', ForeignKey('planet.planet_id'), primary_key=True)
-)
+) 
