@@ -9,6 +9,7 @@ from flask_cors import CORS
 from utils import APIException, generate_sitemap
 from admin import setup_admin
 from models import db, User
+from sqlalchemy import select
 #from models import Person
 
 app = Flask(__name__)
@@ -39,12 +40,32 @@ def sitemap():
 @app.route('/user', methods=['GET'])
 def handle_hello():
 
-    response_body = {
-        "msg": "Hello, this is your GET /user response "
-    }
+    users = User.query.all()
+    print([user.serialize() for user in users])
+    return jsonify([user.serialize() for user in users]), 200
 
-    return jsonify(response_body), 200
 
+
+@app.route('/user', methods=['POST'])
+def create_user():
+    data = request.get_json()
+    if not data.get('email') or not data.get('password'):
+        return jsonify({"error": "Email and password are required"}), 400
+    
+    existing_user = db.session.execute(select(User).where(User.email == data['email']))
+    if existing_user:
+        return jsonify({"error": "User with this email already exists"}), 400
+
+    user = User(email=data['email'], password=data['password'])
+
+    db.session.add(user)
+    db.session.commit()
+
+    return jsonify({"message": "User created successfully"}), 200
+
+
+
+    
 # this only runs if `$ python src/app.py` is executed
 if __name__ == '__main__':
     PORT = int(os.environ.get('PORT', 3000))
