@@ -4,7 +4,7 @@ se pueden gestionar visualmente los modelos de la base de datos.
 """
 import os
 from flask_admin import Admin
-from models import db, User, Character, Planet
+from models import db, User, Character, Planet, favorite_planets, favorite_characters
 from flask_admin.contrib.sqla import ModelView
 
 
@@ -14,8 +14,11 @@ def setup_admin(app):
     app.config['FLASK_ADMIN_SWATCH'] = 'cerulean'
     admin = Admin(app, name='4Geeks Admin', template_mode='bootstrap3')
 
+    class UserAdmin(ModelView):
+        form_columns = ['email', 'password', 'favorite_planets', 'favorite_characters']  # Columnas editables en el formulario
+
     # Modelos disponibles en el panel de administración
-    admin.add_view(ModelView(User, db.session))
+    admin.add_view(UserAdmin(User, db.session))
     admin.add_view(ModelView(Character, db.session))
     admin.add_view(ModelView(Planet, db.session))
 
